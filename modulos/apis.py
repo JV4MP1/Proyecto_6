@@ -16,7 +16,7 @@ def consultar_clima_ciudad(ciudad, api_key):
     try:
         #esta linea es la que sale a internet a pedir los datos
         respuesta = requests.get (URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
-    except requests.exceptions.Requests.Exceptions as error:
+    except requests.exceptions.RequestException as error:
         #esto salta si falla la conexion antes de recibir cualquier dato
         print ("No se pudo conectar:", error)
         return None
@@ -47,4 +47,3 @@ if __name__ == "__main__":
     MI_API_KEY = "964e142c29f9d45b30f5fc112cb8c589"
     resultado = consultar_clima_ciudad("Buenos Aires", MI_API_KEY)
     print(resultado)
-    
