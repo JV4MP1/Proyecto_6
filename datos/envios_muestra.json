@@ -1,0 +1,90 @@
+[
+    {
+        "codigo_seguimiento": "AR100001",
+        "cliente": "Juan Perez",
+        "email": "juan.perez@example.com",
+        "origen": "Buenos Aires",
+        "destino": "Cordoba",
+        "zona": "Centro",
+        "estado": "en término",
+        "prioridad": "normal",
+        "demora_horas": 0
+    },
+    {
+        "codigo_seguimiento": "AR100002",
+        "cliente": "Maria Gonzalez",
+        "email": "maria.gonzalez@example.com",
+        "origen": "Buenos Aires",
+        "destino": "Rosario",
+        "zona": "Litoral",
+        "estado": "preventivo",
+        "prioridad": "media",
+        "demora_horas": 3
+    },
+    {
+        "codigo_seguimiento": "AR100003",
+        "cliente": "Lucas Rodriguez",
+        "email": "lucas.rodriguez@example.com",
+        "origen": "Cordoba",
+        "destino": "Mendoza",
+        "zona": "Cuyo",
+        "estado": "demorado",
+        "prioridad": "alta",
+        "demora_horas": 12
+    },
+    {
+        "codigo_seguimiento": "AR100004",
+        "cliente": "Sofia Martinez",
+        "email": "sofia.martinez@example.com",
+        "origen": "Rosario",
+        "destino": "Buenos Aires",
+        "zona": "Litoral",
+        "estado": "crítico",
+        "prioridad": "crítica",
+        "demora_horas": 30
+    },
+    {
+        "codigo_seguimiento": "AR100005",
+        "cliente": "Nicolas Fernandez",
+        "email": "nicolas.fernandez@example.com",
+        "origen": "Buenos Aires",
+        "destino": "La Plata",
+        "zona": "Buenos Aires",
+        "estado": "en término",
+        "prioridad": "normal",
+        "demora_horas": 0
+    },
+    {
+        "codigo_seguimiento": "AR100006",
+        "cliente": "Valentina Lopez",
+        "email": "valentina.lopez@example.com",
+        "origen": "Mendoza",
+        "destino": "San Juan",
+        "zona": "Cuyo",
+        "estado": "demorado",
+        "prioridad": "alta",
+        "demora_horas": 8
+    },
+    {
+        "codigo_seguimiento": "AR100007",
+        "cliente": "Martin Sanchez",
+        "email": "martin.sanchez@example.com",
+        "origen": "Cordoba",
+        "destino": "Buenos Aires",
+        "zona": "Centro",
+        "estado": "preventivo",
+        "prioridad": "media",
+        "demora_horas": 4
+    },
+    {
+        "codigo_seguimiento": "AR100008",
+        "cliente": "Camila Torres",
+        "email": "camila.torres@example.com",
+        "origen": "Buenos Aires",
+        "destino": "Mar del Plata",
+        "zona": "Costa Atlántica",
+        "estado": "crítico",
+        "prioridad": "crítica",
+        "demora_horas": 36
+    }
+]
