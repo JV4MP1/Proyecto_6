@@ -31,8 +31,7 @@ def analizar_alertas_viales(url: str):
     return alertas
 
 
-""" PRUEBA; YA CORRECTAMENTE EVALUADO
+
 if __name__ == "__main__":
     resultado = analizar_alertas_viales(URL_TRAFICO)
     print("Alertas encontradas:", resultado)
-"""

@@ -52,7 +52,6 @@ def evaluar_riesgo_envio(envio, alertas_viales=None):
         
     return envio["estado"]
 
-""" PRUEBA; YA CORRECTAMENTE EVALUADO
 
 if __name__ == "__main__":
     # Test creando un envio con espacios de más, minusculas en iniciales y mayúsculas en mails
@@ -64,5 +63,3 @@ if __name__ == "__main__":
     envio_test["riesgo_clima"] = "Lluvia Fuerte"
     nuevo_estado = evaluar_riesgo_envio(envio_test)
     print(f"Nuevo estado calculado: {nuevo_estado}")
-
-"""

@@ -2,7 +2,7 @@ import sys
 sys.path.append(".")
 
 import requests
-from config import URL_CLIMA, TIMEOUT_SEGUNDOS
+from config import URL_CLIMA, TIMEOUT_SEGUNDOS, API_KEY_CLIMA
 
 def consultar_clima_ciudad(ciudad, api_key):
     #este es el formulario que le vamos a mandar a la API
@@ -44,6 +44,5 @@ def consultar_clima_ciudad(ciudad, api_key):
 
 if __name__ == "__main__":
     #este bloque sirve para probar la funcion sola 
-    MI_API_KEY = "964e142c29f9d45b30f5fc112cb8c589"
-    resultado = consultar_clima_ciudad("Buenos Aires", MI_API_KEY)
+    resultado = consultar_clima_ciudad("Buenos Aires", API_KEY_CLIMA)
     print(resultado)
