@@ -1,8 +1,8 @@
-import requests
+import sys
+sys.path.append(".")
 
-#estos son los valores fijos que no cambian, por eso van en mayusculas y afuera de la funcion
-URL_CLIMA = "https://api.openweathermap.org/data/2.5/weather"
-TIMEOUT_SEGUNDOS = 10
+import requests
+from config import URL_CLIMA, TIMEOUT_SEGUNDOS
 
 def consultar_clima_ciudad(ciudad, api_key):
     #este es el formulario que le vamos a mandar a la API
@@ -15,10 +15,10 @@ def consultar_clima_ciudad(ciudad, api_key):
     
     try:
         #esta linea es la que sale a internet a pedir los datos
-        respuesta = requests.get (URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
+        respuesta = requests.get(URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
     except requests.exceptions.RequestException as error:
         #esto salta si falla la conexion antes de recibir cualquier dato
-        print ("No se pudo conectar:", error)
+        print("No se pudo conectar:", error)
         return None
     
     #200 es el unico codigo que significa que salio bien 

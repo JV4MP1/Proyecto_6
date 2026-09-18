@@ -37,7 +37,11 @@ def crear_envio(id_envio, cliente, destino, email):
     
     return envio
 
-def evaluar_riesgo_envio(envio):
+def evaluar_riesgo_envio(envio, alertas_viales=None):
+    # Si recibimos alertas viales desde scraping, actualizamos la bandera del envío
+    if alertas_viales and len(alertas_viales) > 0:
+        envio["alerta_vial"] = True
+
     #Evaluamos los distintos escenarios acorde al pronostico y si hay alerta vial
     if envio.get("riesgo_clima") == "Lluvia Fuerte" and envio.get("alerta_vial") is True:
         envio["estado"] = "Critico"
