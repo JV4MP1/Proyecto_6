@@ -1,20 +1,151 @@
 [
   {
-    "id": "env-010",
-    "cliente": "Lionel Messi",
-    "destino": "Santa Fe",
-    "email": "LionelMessi@gmail.com"
+    "id": " env-001 ",
+    "cliente": "lionel messi",
+    "destino": "santa fe",
+    "email": " LionelMessi@gmail.com ",
+    "direccion": "  bv.   gálvez 1234,  santa fe   CP 3000 ",
+    "fecha_despacho": "2026-10-08",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 30
   },
   {
-    "id": "env-007",
+    "id": "env-002",
     "cliente": "Cristiano Ronaldo",
     "destino": "Ushuaia",
-    "email": "comandante@gmail.com"
+    "email": "cr7@gmail.com",
+    "direccion": "san martin 560 CP 9410",
+    "fecha_despacho": "2026-10-09",
+    "horas_estimadas": 72,
+    "horas_transcurridas": 60
+  },
+  {
+    "id": "env-003",
+    "cliente": "lebron james",
+    "destino": "Formosa",
+    "email": "lebroncito@gmail.com",
+    "direccion": "españa 1100 - CP 3600",
+    "fecha_despacho": "2026-10-05",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 100
+  },
+  {
+    "id": "env-004",
+    "cliente": "Ana Torres",
+    "destino": "Salta",
+    "email": "ana.torres@correo.com",
+    "direccion": "caseros 700, CP: 4400",
+    "fecha_despacho": "2026-10-06",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 80
+  },
+  {
+    "id": "env-005",
+    "cliente": "Carlos Gómez",
+    "destino": "tucumán",
+    "email": "CARLOS@MAIL.COM ",
+    "direccion": "Av. Mate de Luna 2000 C.P. 4000",
+    "fecha_despacho": "10/10/2026",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 50
   },
   {
     "id": "env-006",
-    "cliente": "Lebron James",
-    "destino": "Formosa",
-    "email": "lebroncito@gmail.com"
+    "cliente": "Sofía Ramírez",
+    "destino": "córdoba",
+    "email": "sofia.ramirez@mail.com",
+    "direccion": "obispo trejo 300 CP 5000",
+    "fecha_despacho": "2026-10-11",
+    "horas_estimadas": 24,
+    "horas_transcurridas": 30
+  },
+  {
+    "id": "env-007",
+    "cliente": "Pedro López",
+    "destino": "Mendoza",
+    "email": "pedro.lopez.mail.com",
+    "direccion": "San Juan 450",
+    "fecha_despacho": "2026-10-12",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 40
+  },
+  {
+    "id": "env-008",
+    "cliente": "María Paz",
+    "destino": "Rosario",
+    "email": "",
+    "direccion": "córdoba    1500     CP 2000",
+    "fecha_despacho": "2026-10-12",
+    "horas_estimadas": 24,
+    "horas_transcurridas": 24
+  },
+  {
+    "id": "env-009",
+    "cliente": "Julián Álvarez",
+    "destino": "Bariloche",
+    "email": "julian@correo.com",
+    "direccion": "mitre 300 CP 8400",
+    "fecha_despacho": "fecha pendiente",
+    "horas_estimadas": 96,
+    "horas_transcurridas": 90
+  },
+  {
+    "id": "env-010",
+    "cliente": "Empresa Acme",
+    "destino": "buenos aires",
+    "email": "contacto@acme.com",
+    "direccion": "Av. Corrientes 1234 CP 1043",
+    "fecha_despacho": "2026-10-13",
+    "horas_estimadas": 12,
+    "horas_transcurridas": 14
+  },
+  {
+    "id": "env-011",
+    "cliente": "  nuevo cliente  ",
+    "destino": "Narnia",
+    "email": "x@y.com",
+    "direccion": null,
+    "fecha_despacho": "2026-10-13",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 48
+  },
+  {
+    "id": "env-012",
+    "cliente": "Laura Pérez",
+    "destino": "Rosario",
+    "email": "laura@mail.com",
+    "direccion": "pellegrini 800 CP 2000",
+    "fecha_despacho": null,
+    "horas_estimadas": null,
+    "horas_transcurridas": null
+  },
+  {
+    "id": " ENV-001",
+    "cliente": "Registro Duplicado",
+    "destino": "Rosario",
+    "email": "dup@mail.com",
+    "direccion": "calle falsa 123",
+    "fecha_despacho": "2026-10-13",
+    "horas_estimadas": 24,
+    "horas_transcurridas": 10
+  },
+  {
+    "id": "env-014",
+    "cliente": "Sin Email",
+    "destino": "Salta",
+    "direccion": "belgrano 100 CP 4400",
+    "fecha_despacho": "2026-10-13",
+    "horas_estimadas": 48,
+    "horas_transcurridas": 10
+  },
+  {
+    "id": "env-015",
+    "cliente": "Horas Como Texto",
+    "destino": "Rosario",
+    "email": "texto@mail.com",
+    "direccion": "sarmiento 50 CP 2000",
+    "fecha_despacho": "2026-10-13",
+    "horas_estimadas": "48",
+    "horas_transcurridas": 60
   }
 ]

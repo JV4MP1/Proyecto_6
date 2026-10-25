@@ -1,4 +1,3 @@
-# Módulo de scraping: alertas viales del portal de noticias del Gobierno de la Ciudad
 import sys
 sys.path.append(".")
 
@@ -7,8 +6,7 @@ from bs4 import BeautifulSoup
 from config import (URL_SITIO, RUTA_NOTICIAS, URL_TRAFICO, TIMEOUT_SEGUNDOS, USER_AGENT,
                     PALABRA_CLAVE_ALERTA, NAVEGADOR, SITIOS_WEB)
 
-
-# N10: lee el robots.txt y revisa que la ruta no esté en un Disallow
+# N10
 def puede_scrapear(url_sitio, ruta):
     try:
         respuesta = requests.get(url_sitio + "/robots.txt", headers={"User-Agent": USER_AGENT},
@@ -16,7 +14,7 @@ def puede_scrapear(url_sitio, ruta):
     except requests.exceptions.RequestException as error:
         print("No se pudo leer el robots.txt, no se hace scraping:", error)
         return False
-    if respuesta.status_code == 404:  # si el sitio no tiene robots.txt no hay restricciones
+    if respuesta.status_code == 404:
         return True
     if respuesta.status_code != 200:
         print("No se pudo leer el robots.txt, no se hace scraping. Código:", respuesta.status_code)
@@ -30,9 +28,7 @@ def puede_scrapear(url_sitio, ruta):
                 return False
     return True
 
-
-# N10 y N16: descarga el HTML con User-Agent y timeout. Es una sola página por ejecución
-# (límite de frecuencia: no se hacen pedidos en bucle)
+# N10 y N16
 def obtener_html(url):
     if not puede_scrapear(URL_SITIO, RUTA_NOTICIAS):
         return None
@@ -46,8 +42,7 @@ def obtener_html(url):
         return None
     return respuesta.text
 
-
-# N11: recupera de un elemento su texto, href, clases, id, src y atributos data-*
+# N11
 def extraer_atributos(elemento):
     imagen = elemento.find("img")
     datos = {}
@@ -56,7 +51,7 @@ def extraer_atributos(elemento):
             datos[nombre] = elemento[nombre]
     resultado = {
         "texto": elemento.get_text(" ", strip=True),
-        "href": elemento.get("href", "Sin Dato"),  # con .get() no da error si falta el atributo
+        "href": elemento.get("href", "Sin Dato"),
         "clases": elemento.get("class", []),
         "id": elemento.get("id", "Sin Dato"),
         "src": "Sin Dato",
@@ -66,8 +61,7 @@ def extraer_atributos(elemento):
         resultado["src"] = imagen.get("src", "Sin Dato")
     return resultado
 
-
-# N08: registra el sitio (URL, dominio, IP y navegador) y toma datos básicos con find
+# N08
 def registrar_sitio(nombre, html=None):
     datos = SITIOS_WEB[nombre]
     sitio = {
@@ -83,7 +77,7 @@ def registrar_sitio(nombre, html=None):
         return sitio
 
     sopa = BeautifulSoup(html, "html.parser")
-    titulo = sopa.find("title")  # find devuelve solo el primer elemento, o None
+    titulo = sopa.find("title") 
     if titulo is not None:
         sitio["titulo"] = titulo.get_text(strip=True)
     tarjeta = sopa.find("a", class_="card")
@@ -93,8 +87,7 @@ def registrar_sitio(nombre, html=None):
             sitio["primera_noticia"] = titulo_noticia.get_text(strip=True)
     return sitio
 
-
-# N12: un find_all por cada tipo de criterio. Devuelve cuántos elementos encontró cada uno
+# N12
 def ejemplos_find_all(html):
     sopa = BeautifulSoup(html, "html.parser")
     return {
@@ -107,8 +100,7 @@ def ejemplos_find_all(html):
         "combinado": len(sopa.find_all("a", class_="card", attrs={"href": True}, limit=5)),
     }
 
-
-# N07: saca la fecha del texto "Fecha de publicación: dd/mm/aaaa"
+# N07
 def extraer_fecha(texto):
     marca = "Fecha de publicación:"
     posicion = texto.find(marca)
@@ -117,9 +109,7 @@ def extraer_fecha(texto):
     fecha = texto[posicion + len(marca):].strip()[:10]
     return fecha
 
-
-# N12 y tarea 2.1: find_all combinando etiqueta, clase y atributo, y después filtra por texto
-# Devuelve una lista de diccionarios con las mismas claves, lista para pd.DataFrame
+# N12
 def buscar_alertas_viales(html):
     sopa = BeautifulSoup(html, "html.parser")
     alertas = []
@@ -129,7 +119,7 @@ def buscar_alertas_viales(html):
         if PALABRA_CLAVE_ALERTA not in texto.lower() or titulo is None:
             continue
         enlace = tarjeta["href"]
-        if enlace[:1] == "/":  # el enlace viene sin el dominio
+        if enlace[:1] == "/":  
             enlace = URL_SITIO + enlace
         alertas.append({
             "titulo": titulo.get_text(strip=True),
@@ -138,9 +128,7 @@ def buscar_alertas_viales(html):
         })
     return alertas
 
-
 if __name__ == "__main__":
-    # prueba del módulo solo (necesita internet)
     html_portal = obtener_html(URL_TRAFICO)
     print(registrar_sitio("noticias", html_portal))
     if html_portal is not None:

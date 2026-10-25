@@ -5,6 +5,7 @@ __pycache__/
 # Entornos virtuales
 env/
 venv/
+.venv/
 
 # Archivos de configuración con contraseñas/keys reales
-.env
+claves.py
