@@ -2,47 +2,114 @@ import sys
 sys.path.append(".")
 
 import requests
-from config import URL_CLIMA, TIMEOUT_SEGUNDOS, API_KEY_CLIMA
+from config import (URL_CLIMA, URL_OPEN_METEO, URL_ALERTAS_POST, TIMEOUT_SEGUNDOS, API_KEY_CLIMA,
+                    CIUDADES, DESCRIPCIONES_CLIMA, LLUVIA_FUERTE_MM, CODIGOS_LLUVIA_FUERTE)
 
-def consultar_clima_ciudad(ciudad, api_key):
-    #este es el formulario que le vamos a mandar a la API
+# N16
+def avisar_error_http(codigo, que_se_pidio):
+    if codigo == 401:
+        print("API Key inválida o todavía no activada")
+    elif codigo == 404:
+        print("No se encontró:", que_se_pidio)
+    elif codigo == 429:
+        print("Se alcanzó el límite de solicitudes, esperar y reintentar")
+    else:
+        print("Error", codigo, "al consultar:", que_se_pidio)
+
+
+# N13, N16 y N18
+def consultar_clima_open_meteo(ciudad):
+    if ciudad not in CIUDADES:
+        print("No tengo las coordenadas de la ciudad:", ciudad)
+        return None
+
     parametros = {
-        "q": ciudad, 
-        "appid": api_key,
-        "units": "metric", #para que la temperatura venga en grados celsius y no en kelvin
-        "lang": "es" #para que la descripcion venga en español 
+        "latitude": CIUDADES[ciudad]["lat"],
+        "longitude": CIUDADES[ciudad]["lon"],
+        "current": "temperature_2m,precipitation,weather_code",
+        "timezone": "auto",
     }
-    
     try:
-        #esta linea es la que sale a internet a pedir los datos
+        respuesta = requests.get(URL_OPEN_METEO, params=parametros, timeout=TIMEOUT_SEGUNDOS)
+    except requests.exceptions.RequestException as error:
+        print("No se pudo conectar con Open-Meteo:", error)
+        return None
+
+    if respuesta.status_code != 200:
+        avisar_error_http(respuesta.status_code, ciudad)
+        return None
+
+    # N14
+    actual = respuesta.json()["current"]
+    codigo = actual["weather_code"]
+    lluvia_fuerte = codigo in CODIGOS_LLUVIA_FUERTE or actual["precipitation"] >= LLUVIA_FUERTE_MM
+    return {
+        "destino": ciudad,
+        "temperatura": actual["temperature_2m"],
+        "precipitacion_mm": actual["precipitation"],
+        "descripcion": DESCRIPCIONES_CLIMA.get(codigo, "Sin descripción"),
+        "lluvia_fuerte": lluvia_fuerte,
+    }
+
+
+# N17
+def consultar_clima_ciudad(ciudad, api_key):
+    if api_key == "":
+        print("Falta configurar la API key en claves.py")
+        return None
+
+    parametros = {"q": ciudad + ",AR", "appid": api_key, "units": "metric", "lang": "es"}
+    try:
         respuesta = requests.get(URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
     except requests.exceptions.RequestException as error:
-        #esto salta si falla la conexion antes de recibir cualquier dato
-        print("No se pudo conectar:", error)
+        print("No se pudo conectar con OpenWeatherMap:", error)
         return None
-    
-    #200 es el unico codigo que significa que salio bien 
+
     if respuesta.status_code != 200:
-        #si llegas aca es porque algo salio mal, te tenes que fijar que fue 
-        if respuesta.status_code == 401:
-            print("API Key invalida o todavia no activada")
-        elif respuesta.status_code == 404:
-            print("No se encontro la ciudad:", ciudad)
-        elif respuesta.status_code == 429:
-            print("Se alcanzo el limite de solicitudes, esperar y reintentar")
-        else:
-            print("Error:", respuesta.status_code)
-        return None #no tiene sentido seguir si no llegan datos
-    
-    #a partir de aca, la respuesta vino bien 
+        avisar_error_http(respuesta.status_code, ciudad)
+        return None
+
     datos = respuesta.json()
     return {
+        "destino": ciudad,
         "temperatura": datos["main"]["temp"],
-        "clima_principal": datos["weather"][0]["main"], #weather es una lista, por eso [0] (el primer y unico elemnto)
-        "descripcion": datos["weather"][0]["description"]
+        "descripcion": datos["weather"][0]["description"],
     }
 
+def obtener_clima_destinos(destinos):
+    ciudades_consultadas = []
+    lista_clima = []
+    for ciudad in destinos:
+        if ciudad in ciudades_consultadas:
+            continue
+        ciudades_consultadas.append(ciudad)
+        clima = consultar_clima_open_meteo(ciudad)
+        if clima is not None:
+            lista_clima.append(clima)
+    return lista_clima
+
+
+# N15
+def enviar_alerta_post(envio):
+    alerta = {
+        "id_envio": envio["id"],
+        "estado": envio["estado"],
+        "zona": envio["zona"],
+        "causa": envio["causa"],
+        "accion_recomendada": envio["accion_recomendada"],
+    }
+    try:
+        respuesta = requests.post(URL_ALERTAS_POST, json=alerta, timeout=TIMEOUT_SEGUNDOS)
+    except requests.exceptions.RequestException as error:
+        print("No se pudo enviar la alerta por POST:", error)
+        return None
+
+    if respuesta.status_code != 201:
+        avisar_error_http(respuesta.status_code, envio["id"])
+        return None
+    return respuesta.json()
+
+
 if __name__ == "__main__":
-    #este bloque sirve para probar la funcion sola 
-    resultado = consultar_clima_ciudad("Buenos Aires", API_KEY_CLIMA)
-    print(resultado)
+    print(consultar_clima_open_meteo("Buenos Aires"))
+    print(consultar_clima_ciudad("Buenos Aires", API_KEY_CLIMA))
