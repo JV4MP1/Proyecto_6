@@ -29,6 +29,24 @@ USER_AGENT = "TallerProgramacionII-Proyecto6 (uso academico)"
 PALABRA_CLAVE_ALERTA = "cortes de tránsito"
 ZONA_ALERTAS_VIALES = "AMBA" 
 
+# N19 y N21
+CARPETA_SALIDAS = "salidas"
+PREFIJO_REPORTE = "reporte_criticos_"
+ENCODING_CSV = "utf-8-sig"
+
+# N19, N20 y criterio de aceptación 1
+COLUMNAS_OBLIGATORIAS = ["id", "estado", "zona", "demora_horas", "cumplimiento"]
+COLUMNAS_NUMERICAS = ["distancia_km", "horas_estimadas", "horas_transcurridas", "demora_horas", "cumplimiento"]
+COLUMNAS_CLIMA = ["destino", "temperatura", "precipitacion_mm", "descripcion", "lluvia_fuerte"]
+COLUMNAS_ALERTAS = ["titulo", "fecha", "enlace"]
+COLUMNAS_REPORTE = ["id", "cliente", "destino", "zona", "prioridad", "demora_horas", "causa",
+                    "accion_recomendada", "descripcion_clima", "cantidad_alertas"]
+COLUMNAS_CALIDAD = ["id", "cliente", "destino", "zona", "fecha_despacho", "horas_estimadas", "horas_transcurridas"]
+
+# N22
+DIAS_SEMANA = {"Monday": "Lunes", "Tuesday": "Martes", "Wednesday": "Miércoles", "Thursday": "Jueves",
+               "Friday": "Viernes", "Saturday": "Sábado", "Sunday": "Domingo"}
+
 # N05
 URLS_NOVEDADES_VIALES = [URL_TRAFICO]
 CENTROS_DISTRIBUCION = ["Buenos Aires"]

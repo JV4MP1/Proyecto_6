@@ -21,6 +21,7 @@ Proyecto_6/
 ├── claves_ejemplo.py
 ├── datos/
 │   └── envios_muestra.json
+├── salidas/   (la genera el ETL, no se sube a GitHub)
 │
 ├── modulos/
 │   ├── envios.py
@@ -49,7 +50,7 @@ Proyecto_6/
 
 `metricas.py` calcula los indicadores con Pandas y genera el gráfico de estados.
 
-`etl.py` realiza la extracción, la unión y la exportación de los datos con Pandas. Esta parte está a cargo del Integrante 1 y todavía está en desarrollo.
+`etl.py` realiza la extracción, la transformación, la unión y la exportación de los datos con Pandas.
 
 `notificaciones.py` se ocupará del envío de emails. Todavía está pendiente.
 
@@ -115,21 +116,36 @@ El contenido del portal tiene licencia Creative Commons Reconocimiento 2.5 Argen
 
 ## Proceso ETL
 
-Los datos utilizados por el sistema vienen de tres lugares: el archivo JSON de envíos, la API de clima y la página web de noticias.
+El proceso está en `modulos/etl.py` y lo ejecuta `main.py` con la función `ejecutar_etl`, después de evaluar los riesgos de cada envío. Devuelve el DataFrame que usa `metricas.py` y las rutas de los archivos generados, para que `notificaciones.py` pueda adjuntar el reporte.
 
-Primero se extraen los datos. Las funciones de `apis.py` y `scraping.py` devuelven listas de diccionarios con las mismas claves, de modo que se pueden convertir directamente en un DataFrame de Pandas.
+**Extracción.** Entran tres listas de diccionarios: los envíos (`envios.py`), el clima (`apis.py`) y las alertas viales (`scraping.py`). Se convierten en DataFrames y se conserva una copia cruda de los envíos, que se usa para validar que la transformación no perdió filas. También se lee `envios_muestra.json` con `read_json` para comparar sus 15 filas con las 12 cargadas. La limpieza y la clasificación no se repiten: siguen en `envios.py`.
 
-Después se limpian y transforman: se normalizan los códigos, nombres, destinos, emails y direcciones, se calculan la demora, el cumplimiento, la distancia y la prioridad, y se clasifica cada envío según la demora, el clima y las alertas.
+**Transformación.**
 
-Finalmente se arma el DataFrame de envíos, se revisa su forma, sus tipos de datos y sus valores nulos, y se calculan los indicadores con `groupby`: el porcentaje de envíos críticos por zona y la demora promedio por zona.
+- **Fechas:** `fecha_despacho` trae dos formatos, así que cada uno se convierte por separado con `format=` y después se combinan con `fillna`. Convertir todo junto pierde fechas o invierte el día y el mes sin avisar. Lo que no es una fecha queda como `NaT` y no se inventa. Con la muestra quedan 10 fechas válidas y 2 `NaT`.
+- **Nulos:** no se imputan. Una demora de 0 afirmaría que el envío llegó en tiempo cuando no se sabe, y bajaría el promedio. Los envíos sin horas o con un destino desconocido se marcan en `datos_incompletos` y las fechas faltantes en `fecha_invalida`.
+- **Columnas calculadas:** `severidad` sale de aplicar `ESTADOS_ENVIO` con `.map()`, y `diferencia_horas` de una resta entre columnas.
+- **Clima:** `merge` por `destino` con `how="left"`, para conservar todos los envíos, y `validate="many_to_one"`. Sin dato de clima no significa que no llueva, por eso `lluvia_fuerte` queda nula y se marca `clima_disponible`.
+- **Alertas:** no tienen una clave por envío y unirlas directo multiplicaría las filas. Primero se resumen con `groupby` a una fila por zona y después se unen por `zona`. Fuera de AMBA quedan nulas, porque las noticias son solo de la Ciudad de Buenos Aires.
+- **Resúmenes:** envíos por estado y zona, envíos por día de despacho y una tabla por zona armada con `join`.
 
-Algunas tareas del proceso están a cargo del Integrante 1 en `etl.py`: leer el JSON con Pandas, convertir las fechas, tratar los valores nulos, unir los envíos con los datos del clima con `merge` (la columna en común es `destino`) y exportar el reporte de envíos críticos a CSV o Excel. Cuando ese módulo esté listo, en `main.py` la línea que arma el DataFrame se reemplazará por su función.
+**Carga.** Todo se escribe en la carpeta `salidas/`, nunca en `datos/`. `AAAA-MM-DD` es la fecha de la ejecución.
+
+| Archivo | Contenido |
+|---|---|
+| `reporte_criticos_AAAA-MM-DD` (`.csv`, `.xlsx`, `.json`, `.csv.gz`) | Reporte diario de críticos con cliente, zona, causa y acción recomendada |
+| `revision_datos_AAAA-MM-DD.csv` | Envíos con datos incompletos, para que alguien los revise |
+| `comparacion_criticos_AAAA-MM-DD.csv` | Críticos nuevos, resueltos y persistentes contra el reporte anterior. No se genera el primer día |
+| `historial_criticos.csv` | Todos los reportes diarios apilados con `concat` |
+| `ranking_criticos_AAAA-MM-DD.png` | Gráfico de zonas según el porcentaje de críticos |
+
+**Validaciones.** Con `assert` se controla que los `id` sean únicos y no nulos, que cada `merge` mantenga la cantidad de filas y que estén las columnas que necesita `metricas.py`. Después de exportar, cada archivo del reporte se vuelve a leer, incluido el comprimido, y se comparan sus filas, columnas e `id`. Si una regla no se cumple, el programa se detiene e informa cuál fue.
 
 ## Reporte y gráfico
 
-El programa muestra por pantalla un reporte con los envíos críticos, indicando el cliente, la zona, la causa y la acción recomendada.
+El programa muestra por pantalla un reporte con los envíos críticos, indicando el cliente, la zona, la causa y la acción recomendada, y lo exporta como archivo en `salidas/`.
 
-También muestra un gráfico de barras, hecho con `df.plot`, con la cantidad de envíos de cada estado. Hay que cerrar la ventana del gráfico para que el programa termine.
+También muestra un gráfico de barras, hecho con `df.plot`, con la cantidad de envíos de cada estado. Hay que cerrar la ventana del gráfico para que el programa termine. El ranking de zonas no se abre en una ventana: se guarda como imagen en `salidas/`.
 
 ## Envío de emails
 
@@ -156,12 +172,13 @@ requests
 beautifulsoup4
 pandas
 matplotlib
+openpyxl
 ```
 
 Se pueden instalar con el siguiente comando:
 
 ```text
-pip install requests beautifulsoup4 pandas matplotlib
+pip install requests beautifulsoup4 pandas matplotlib openpyxl
 ```
 
 Para usar OpenWeatherMap hay que copiar `claves_ejemplo.py` con el nombre `claves.py` y escribir adentro la API key propia. Si ese archivo no existe, el programa funciona igual y usa solo Open-Meteo.
@@ -174,7 +191,7 @@ El proyecto debe ejecutarse desde su carpeta principal:
 python main.py
 ```
 
-También se puede probar cada módulo por separado, por ejemplo `python modulos/envios.py`, `python modulos/apis.py`, `python modulos/scraping.py` o `python modulos/metricas.py`. Las pruebas de `apis.py` y `scraping.py` necesitan conexión a internet.
+También se puede probar cada módulo por separado, por ejemplo `python modulos/envios.py`, `python modulos/apis.py`, `python modulos/scraping.py`, `python modulos/metricas.py` o `python modulos/etl.py`. Las pruebas de `apis.py` y `scraping.py` necesitan conexión a internet.
 
 ## Objetivo final
 
