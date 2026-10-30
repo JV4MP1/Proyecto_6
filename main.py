@@ -5,6 +5,7 @@ import pandas as pd
 from config import (RUTA_ENVIO_DATOS, URLS_NOVEDADES_VIALES, SITIOS_WEB, API_KEY_CLIMA, ESTADO_CRITICO,
                     ZONA_ALERTAS_VIALES)
 from modulos.apis import consultar_clima_ciudad, obtener_clima_destinos, enviar_alerta_post
+from modulos.etl import ejecutar_etl
 from modulos.envios import cargar_envios, evaluar_riesgo_envio, generar_mensaje_cliente, armar_asunto_email, filtrar_por_estado
 from modulos.metricas import (inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona,
                               indicadores_generales, graficar_estados)
@@ -92,8 +93,8 @@ def ejecutar_plataforma():
             enviadas += 1
     print(f"Alertas enviadas por POST: {enviadas} de {len(criticos)}")
 
-    # Cuando esté modulos/etl.py (Integrante 1), esta línea se reemplaza por el DataFrame de su extracción
-    df_envios = pd.DataFrame(lista_envios)
+    # N19: va después de evaluar los riesgos para que estado, causa y acción ya existan
+    df_envios, rutas_etl = ejecutar_etl(lista_envios, lista_clima, alertas_viales)
     print("\n=== Inspección del DataFrame ===")
     inspeccionar_df(df_envios)
 

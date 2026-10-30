@@ -9,3 +9,6 @@ venv/
 
 # Archivos de configuración con contraseñas/keys reales
 claves.py
+
+# Archivos generados por el ETL
+salidas/
