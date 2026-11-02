@@ -21,7 +21,7 @@ Proyecto_6/
 ├── claves_ejemplo.py
 ├── datos/
 │   └── envios_muestra.json
-├── salidas/   (la genera el ETL, no se sube a GitHub)
+├── salidas/   (la genera el programa con los reportes y el registro de correos, no se sube a GitHub)
 │
 ├── modulos/
 │   ├── envios.py
@@ -42,17 +42,17 @@ Proyecto_6/
 
 `envios_muestra.json` contiene algunos datos de ejemplo de los envíos para poder probar el funcionamiento del programa.
 
-`envios.py` se utiliza para limpiar los datos de los envíos, hacer los cálculos, clasificar los estados y armar los mensajes para los clientes.
+`envios.py` se utiliza para limpiar los datos de los envíos, hacer los cálculos, clasificar los estados y armar los mensajes para los clientes (incisos N02 a N07).
 
-`apis.py` se utiliza para consultar el clima mediante las APIs de Open-Meteo y OpenWeatherMap, y para enviar alertas con el método POST.
+`apis.py` se utiliza para consultar el clima mediante las APIs de Open-Meteo y OpenWeatherMap, y para enviar alertas con el método POST (incisos N13 a N18).
 
-`scraping.py` se encarga de obtener las novedades de tránsito de una página web mediante scraping.
+`scraping.py` se encarga de obtener las novedades de tránsito de una página web mediante scraping (incisos N08 a N12).
 
-`metricas.py` calcula los indicadores con Pandas y genera el gráfico de estados.
+`metricas.py` calcula los indicadores con Pandas y genera el gráfico de estados (incisos N20 y N23).
 
-`etl.py` realiza la extracción, la transformación, la unión y la exportación de los datos con Pandas.
+`etl.py` realiza la extracción, la transformación, la unión y la exportación de los datos con Pandas (incisos N19 a N23).
 
-`notificaciones.py` se ocupará del envío de emails. Todavía está pendiente.
+`notificaciones.py` se encarga de enviar el reporte diario y los avisos a los clientes por email, y de guardar un registro de cada correo enviado (incisos N24 y N25).
 
 ## Datos de prueba
 
@@ -149,9 +149,43 @@ También muestra un gráfico de barras, hecho con `df.plot`, con la cantidad de 
 
 ## Envío de emails
 
-Los mensajes para los clientes se arman a partir de una plantilla según el estado del envío, por ejemplo "tu envío está demorado". El asunto incluye el código de seguimiento y el estado.
+El módulo `notificaciones.py` envía dos tipos de correos con `smtplib` y `EmailMessage`.
 
-El envío real de los emails con `smtplib` y `EmailMessage` todavía está pendiente en `notificaciones.py`.
+El primero es el **reporte diario de envíos críticos**. Se manda a la lista de destinatarios (`DESTINATARIOS_REPORTE`) con el listado de los envíos críticos en el cuerpo (cliente, zona, causa y acción recomendada) y tres archivos adjuntos: el reporte en CSV, el reporte en Excel y el gráfico de zonas. Los adjuntos salen de las rutas que devuelve el ETL y su lista está en `ADJUNTOS_REPORTE`, dentro de `config.py`.
+
+El segundo son los **avisos a los clientes**: un correo por cada envío que no está en término, con el asunto y el mensaje que se arman en `envios.py` según el estado. Si el email del cliente no es válido, no se envía y queda anotado como omitido.
+
+Mientras `MODO_PRUEBA` esté en `True` (es el valor por defecto), los avisos no se mandan a los clientes de la muestra: se envían a los destinatarios del reporte y el asunto empieza con "[PRUEBA para ...]". Para escribirle a los clientes de verdad hay que cambiarlo a `False` en `config.py`.
+
+La conexión se hace una sola vez y sigue los pasos de la clase: conectarse al servidor con `smtplib.SMTP`, `ehlo()`, `starttls()` para cifrar, `ehlo()`, `login()` y un `send_message()` por cada correo.
+
+**Trazabilidad de errores.** Cada correo queda registrado en `salidas/log_correos_AAAA-MM-DD.csv` con la fecha y la hora, los destinatarios, el asunto, los adjuntos, el resultado (Enviado, Error u Omitido) y el detalle del error. Se controlan estos casos:
+
+**Contraseña rechazada:** `login()` tira `SMTPAuthenticationError` y todos los correos pendientes quedan como error.
+
+**Correo rechazado por el servidor:** `send_message()` tira una excepción de `smtplib` y solo ese correo queda como error. Los demás se siguen enviando.
+
+**Sin conexión o servidor que no responde:** se captura `OSError` y los correos que faltaban quedan como error. Si la conexión se cae a mitad de camino, los que ya salieron figuran como enviados.
+
+En ningún caso el programa se detiene. Si en `claves.py` faltan los datos del correo, el programa avisa y no envía nada.
+
+## Otros puntos de la consigna
+
+**API pública y API privada (N13).** Una API pública la puede usar cualquier desarrollador siguiendo las condiciones que publica el servicio, y a veces pide registrarse o usar una clave. Una API privada o interna solo la usan usuarios o aplicaciones autorizadas, por ejemplo el sistema interno de una empresa. Open-Meteo es pública y no pide clave, y OpenWeatherMap es pública pero necesita una API key. El proyecto solo usa APIs públicas.
+
+**JSON y XML (N14).** Las APIs del proyecto responden en JSON, que `requests` convierte en un diccionario con `respuesta.json()`. Después se accede a los datos con claves y posiciones, y los números ya vienen como números. XML organiza los datos en etiquetas anidadas, parecido a HTML, y se recorre con una librería de XML. Todos sus valores llegan como texto y hay que convertirlos. El proyecto no consume XML.
+
+**Métodos HTTP (N15).** Se usa GET para consultar el clima y descargar páginas, y POST para enviar la alerta de un envío crítico. PUT serviría para reemplazar todos los datos de un envío, PATCH para cambiar solo una parte, por ejemplo el estado, y DELETE para eliminar un envío. No se usan porque el proyecto no tiene una API propia que guarde los envíos.
+
+**HTML de la página (N09).** Con las herramientas del navegador (F12) se vio que cada noticia es una etiqueta `a` con la clase `card` y un `href`. Adentro tiene una `img` con la clase `card-img-top`, un `div` con la clase `card-body` que contiene el título en un `h4` con la clase `card-title` y un texto en un `p` con la clase `card-text`, y un `div` con la clase `card-footer`. Las tarjetas están dentro de un `div` con la clase `card-deck`. El título de la página está en la etiqueta `title`, dentro de `head`.
+
+**DNS e IP (N08).** El DNS traduce el nombre de un sitio a su dirección IP. Las IP de los tres sitios se consultaron con `nslookup` el 25/10/2026 y están en `SITIOS_WEB`, dentro de `config.py`. Pueden cambiar con el tiempo.
+
+**Protocolos de correo (N25).** SMTP es el protocolo que se usa para enviar un correo, desde el cliente hasta el servidor y entre servidores. No sirve para leer el buzón: eso lo resuelven POP3 e IMAP. POP3 descarga los mensajes al dispositivo y normalmente los borra del servidor, así que quedan en un solo equipo, y no maneja carpetas ni estados en el servidor. IMAP deja los mensajes en el servidor y los sincroniza entre varios dispositivos, con carpetas y marcas como leído. Como el proyecto solo envía correos, usa SMTP, con `smtplib` para la conexión y `EmailMessage` para armar el mensaje.
+
+**Servidor de email usado.** Gmail, con `smtp.gmail.com` y el puerto 587. La conexión empieza sin cifrar y se pasa a una conexión cifrada con `starttls()` antes de enviar la contraseña.
+
+**Acceso a Gmail desde Python.** Gmail ya no acepta la contraseña normal de la cuenta para un programa. Hay dos formas de entrar. La primera es una contraseña de aplicación: se genera en la cuenta de Google, hace falta tener activada la verificación en dos pasos y se usa en lugar de la contraseña. La segunda es OAuth, donde el usuario autoriza a la aplicación y esta recibe un token, sin manejar nunca la contraseña. El proyecto usa la contraseña de aplicación, guardada en `claves.py`. Si es incorrecta, `login()` tira `SMTPAuthenticationError` y el error queda en el registro de correos.
 
 ## Configuración
 
@@ -159,7 +193,7 @@ Las configuraciones generales del proyecto se encuentran en `config.py`.
 
 De esta manera, si hay que cambiar algún valor utilizado por varios módulos, como los umbrales de demora, las ciudades o las direcciones de las APIs, se puede modificar desde un solo lugar.
 
-La API key se guarda aparte, en `claves.py`.
+La API key y los datos del correo se guardan aparte, en `claves.py`. Los datos del correo son el usuario, la contraseña de aplicación y los destinatarios del reporte.
 
 ## Instalación
 
@@ -181,7 +215,7 @@ Se pueden instalar con el siguiente comando:
 pip install requests beautifulsoup4 pandas matplotlib openpyxl
 ```
 
-Para usar OpenWeatherMap hay que copiar `claves_ejemplo.py` con el nombre `claves.py` y escribir adentro la API key propia. Si ese archivo no existe, el programa funciona igual y usa solo Open-Meteo.
+Hay que copiar `claves_ejemplo.py` con el nombre `claves.py` y completar los datos propios: la API key de OpenWeatherMap y los datos del correo. Si ese archivo no existe, el programa funciona igual: usa solo Open-Meteo y no envía emails.
 
 ## Ejecución
 
@@ -191,7 +225,7 @@ El proyecto debe ejecutarse desde su carpeta principal:
 python main.py
 ```
 
-También se puede probar cada módulo por separado, por ejemplo `python modulos/envios.py`, `python modulos/apis.py`, `python modulos/scraping.py`, `python modulos/metricas.py` o `python modulos/etl.py`. Las pruebas de `apis.py` y `scraping.py` necesitan conexión a internet.
+También se puede probar cada módulo por separado, por ejemplo `python modulos/envios.py`, `python modulos/apis.py`, `python modulos/scraping.py`, `python modulos/metricas.py`, `python modulos/etl.py` o `python modulos/notificaciones.py`. Las pruebas de `apis.py`, `scraping.py` y `notificaciones.py` necesitan conexión a internet. La de `notificaciones.py` también necesita los datos del correo en `claves.py`.
 
 ## Objetivo final
 
