@@ -19,6 +19,7 @@ Proyecto_6/
 ├── config.py
 ├── claves.py
 ├── claves_ejemplo.py
+├── requirements.txt
 ├── datos/
 │   └── envios_muestra.json
 ├── salidas/   (la genera el programa con los reportes y el registro de correos, no se sube a GitHub)
@@ -173,13 +174,13 @@ En ningún caso el programa se detiene. Si en `claves.py` faltan los datos del c
 
 **API pública y API privada (N13).** Una API pública la puede usar cualquier desarrollador siguiendo las condiciones que publica el servicio, y a veces pide registrarse o usar una clave. Una API privada o interna solo la usan usuarios o aplicaciones autorizadas, por ejemplo el sistema interno de una empresa. Open-Meteo es pública y no pide clave, y OpenWeatherMap es pública pero necesita una API key. El proyecto solo usa APIs públicas.
 
-**JSON y XML (N14).** Las APIs del proyecto responden en JSON, que `requests` convierte en un diccionario con `respuesta.json()`. Después se accede a los datos con claves y posiciones, y los números ya vienen como números. XML organiza los datos en etiquetas anidadas, parecido a HTML, y se recorre con una librería de XML. Todos sus valores llegan como texto y hay que convertirlos. El proyecto no consume XML.
+**JSON y XML (N14).** Las APIs del proyecto responden en JSON, que `requests` convierte en un diccionario con `respuesta.json()`. Después se accede a los datos con claves y posiciones, y los números ya vienen como números. XML organiza los datos en etiquetas anidadas, parecido a HTML, y se recorre con una librería de XML. Todos sus valores llegan como texto y hay que convertirlos. Si está configurada la API key, el programa pide a OpenWeatherMap el clima de una ciudad también en XML (`mode=xml`), lo lee con `xml.etree.ElementTree` y convierte la temperatura con `float()`. En JSON se accede con `datos["main"]["temp"]` y el número ya llega como número. En XML se busca la etiqueta con `find("temperature")` y se lee su atributo con `get("value")`.
 
 **Métodos HTTP (N15).** Se usa GET para consultar el clima y descargar páginas, y POST para enviar la alerta de un envío crítico. PUT serviría para reemplazar todos los datos de un envío, PATCH para cambiar solo una parte, por ejemplo el estado, y DELETE para eliminar un envío. No se usan porque el proyecto no tiene una API propia que guarde los envíos.
 
-**HTML de la página (N09).** Con las herramientas del navegador (F12) se vio que cada noticia es una etiqueta `a` con la clase `card` y un `href`. Adentro tiene una `img` con la clase `card-img-top`, un `div` con la clase `card-body` que contiene el título en un `h4` con la clase `card-title` y un texto en un `p` con la clase `card-text`, y un `div` con la clase `card-footer`. Las tarjetas están dentro de un `div` con la clase `card-deck`. El título de la página está en la etiqueta `title`, dentro de `head`.
+**HTML de la página (N09).** Con las herramientas del navegador (F12) se vio que cada noticia es una etiqueta `a` con la clase `card` y un `href`. Adentro tiene una `img` con la clase `card-img-top`, un `div` con la clase `card-body` que contiene el título en un `h4` con la clase `card-title` y un texto en un `p` con la clase `card-text`, y un `div` con la clase `card-footer`. Las tarjetas están dentro de un `div` con la clase `card-deck`. El título de la página está en la etiqueta `title`, dentro de `head`. Como en cualquier página, todo está dentro de `html`, y el contenido visible, dentro de `body`. Los `span` se usan para textos cortos como los del menú y la ruta de navegación. La página no tiene tablas (`table`, `tr`, `td`): las noticias se arman con `div`. De cada tarjeta se recuperan el texto, el `href`, la clase, el `id`, el `src` de la imagen y los atributos `data-*` con `extraer_atributos` (N11).
 
-**DNS e IP (N08).** El DNS traduce el nombre de un sitio a su dirección IP. Las IP de los tres sitios se consultaron con `nslookup` el 25/10/2026 y están en `SITIOS_WEB`, dentro de `config.py`. Pueden cambiar con el tiempo.
+**DNS e IP (N08).** El DNS traduce el nombre de un sitio a su dirección IP. Las IP de los tres sitios se consultaron con `nslookup` el 25/10/2026 y están en `SITIOS_WEB`, dentro de `config.py`. Como pueden cambiar con el tiempo, `registrar_sitio` resuelve el dominio con `socket.gethostbyname` cada vez que se ejecuta el programa. Si no hay conexión, usa la IP anotada.
 
 **Protocolos de correo (N25).** SMTP es el protocolo que se usa para enviar un correo, desde el cliente hasta el servidor y entre servidores. No sirve para leer el buzón: eso lo resuelven POP3 e IMAP. POP3 descarga los mensajes al dispositivo y normalmente los borra del servidor, así que quedan en un solo equipo, y no maneja carpetas ni estados en el servidor. IMAP deja los mensajes en el servidor y los sincroniza entre varios dispositivos, con carpetas y marcas como leído. Como el proyecto solo envía correos, usa SMTP, con `smtplib` para la conexión y `EmailMessage` para armar el mensaje.
 
@@ -213,6 +214,12 @@ Se pueden instalar con el siguiente comando:
 
 ```text
 pip install requests beautifulsoup4 pandas matplotlib openpyxl
+```
+
+O, con la lista de `requirements.txt`:
+
+```text
+pip install -r requirements.txt
 ```
 
 Hay que copiar `claves_ejemplo.py` con el nombre `claves.py` y completar los datos propios: la API key de OpenWeatherMap y los datos del correo. Si ese archivo no existe, el programa funciona igual: usa solo Open-Meteo y no envía emails.

@@ -1,0 +1,5 @@
+requests # llama a las APIs de clima y descarga la página de noticias
+beautifulsoup4 # lee el HTML de la página (scraping)
+pandas # arma los DataFrames del ETL y calcula los indicadores
+matplotlib # dibuja los gráficos
+openpyxl # Pandas lo necesita para escribir archivos Excel (.xlsx)
