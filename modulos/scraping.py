@@ -1,6 +1,8 @@
 import sys
 sys.path.append(".")
 
+import socket
+from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from config import (URL_SITIO, RUTA_NOTICIAS, URL_TRAFICO, TIMEOUT_SEGUNDOS, USER_AGENT,
@@ -30,7 +32,9 @@ def puede_scrapear(url_sitio, ruta):
 
 # N10 y N16
 def obtener_html(url):
-    if not puede_scrapear(URL_SITIO, RUTA_NOTICIAS):
+    # El robots.txt se lee del mismo sitio que se va a descargar, así sirve para cualquier URL de la lista
+    partes = urlparse(url)
+    if not puede_scrapear(f"{partes.scheme}://{partes.netloc}", partes.path):
         return None
     try:
         respuesta = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT_SEGUNDOS)
@@ -61,6 +65,14 @@ def extraer_atributos(elemento):
         resultado["src"] = imagen.get("src", "Sin Dato")
     return resultado
 
+# N11
+def atributos_primera_tarjeta(html):
+    sopa = BeautifulSoup(html, "html.parser")
+    tarjeta = sopa.find("a", class_="card")
+    if tarjeta is None:
+        return None
+    return extraer_atributos(tarjeta)
+
 # N08
 def registrar_sitio(nombre, html=None):
     datos = SITIOS_WEB[nombre]
@@ -73,6 +85,11 @@ def registrar_sitio(nombre, html=None):
         "titulo": "Sin Dato",
         "primera_noticia": "Sin Dato",
     }
+    # El DNS traduce el dominio a la IP en el momento de ejecutar. Si no hay conexión queda la IP anotada en config.py
+    try:
+        sitio["ip"] = socket.gethostbyname(datos["dominio"])
+    except OSError:
+        print("No se pudo resolver el DNS de", datos["dominio"], "- se usa la IP anotada")
     if html is None:
         return sitio
 

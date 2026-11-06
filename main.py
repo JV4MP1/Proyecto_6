@@ -4,13 +4,13 @@ sys.path.append(".")
 import pandas as pd
 from config import (RUTA_ENVIO_DATOS, URLS_NOVEDADES_VIALES, SITIOS_WEB, API_KEY_CLIMA, ESTADO_CRITICO,
                     ZONA_ALERTAS_VIALES)
-from modulos.apis import consultar_clima_ciudad, obtener_clima_destinos, enviar_alerta_post
+from modulos.apis import consultar_clima_ciudad, consultar_clima_xml, obtener_clima_destinos, enviar_alerta_post
 from modulos.etl import ejecutar_etl
 from modulos.envios import cargar_envios, evaluar_riesgo_envio, generar_mensaje_cliente, armar_asunto_email, filtrar_por_estado
 from modulos.notificaciones import enviar_notificaciones
-from modulos.metricas import (inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona,
-                              indicadores_generales, graficar_estados)
-from modulos.scraping import obtener_html, registrar_sitio, ejemplos_find_all, buscar_alertas_viales
+from modulos.metricas import (inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona, indicadores_generales, graficar_estados)
+from modulos.scraping import (obtener_html, registrar_sitio, ejemplos_find_all, buscar_alertas_viales,
+                              atributos_primera_tarjeta)
 
 def ejecutar_plataforma():
     alertas_viales = []
@@ -19,6 +19,8 @@ def ejecutar_plataforma():
         html_noticias = obtener_html(url)
         if html_noticias is not None:
             print("Criterios de find_all:", ejemplos_find_all(html_noticias))
+            # N11
+            print("Atributos de la primera noticia:", atributos_primera_tarjeta(html_noticias))
             alertas_viales += buscar_alertas_viales(html_noticias)
 
     print("\n=== Sitios registrados ===")
@@ -55,6 +57,12 @@ def ejecutar_plataforma():
             clima_owm = consultar_clima_ciudad(destino, API_KEY_CLIMA)
             if clima_owm is not None:
                 clima_owm_por_destino[destino] = clima_owm
+        # N14: la misma consulta en XML, solo para la primera ciudad, para comparar con la respuesta JSON
+        for destino in clima_owm_por_destino:
+            clima_xml = consultar_clima_xml(destino, API_KEY_CLIMA)
+            if clima_xml is not None:
+                print(f"OpenWeatherMap en XML ({destino}): {clima_xml['descripcion']} ({clima_xml['temperatura']}°C)")
+            break
     else:
         print("OpenWeatherMap sin configurar (falta claves.py), se usa solo Open-Meteo")
 
