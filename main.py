@@ -2,15 +2,13 @@ import sys
 sys.path.append(".")
 
 import pandas as pd
-from config import (RUTA_ENVIO_DATOS, URLS_NOVEDADES_VIALES, SITIOS_WEB, API_KEY_CLIMA, ESTADO_CRITICO,
-                    ZONA_ALERTAS_VIALES)
+from config import RUTA_ENVIO_DATOS, URLS_NOVEDADES_VIALES, SITIOS_WEB, API_KEY_CLIMA, ESTADO_CRITICO, ZONA_ALERTAS_VIALES
 from modulos.apis import consultar_clima_ciudad, consultar_clima_xml, obtener_clima_destinos, enviar_alerta_post
 from modulos.etl import ejecutar_etl
 from modulos.envios import cargar_envios, evaluar_riesgo_envio, generar_mensaje_cliente, armar_asunto_email, filtrar_por_estado
 from modulos.notificaciones import enviar_notificaciones
-from modulos.metricas import (inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona, indicadores_generales, graficar_estados)
-from modulos.scraping import (obtener_html, registrar_sitio, ejemplos_find_all, buscar_alertas_viales,
-                              atributos_primera_tarjeta)
+from modulos.metricas import inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona, indicadores_generales, graficar_estados
+from modulos.scraping import obtener_html, registrar_sitio, ejemplos_find_all, buscar_alertas_viales, atributos_primera_tarjeta
 
 def ejecutar_plataforma():
     alertas_viales = []
