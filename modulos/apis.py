@@ -63,7 +63,8 @@ def consultar_clima_ciudad(ciudad, api_key):
     try:
         respuesta = requests.get(URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
     except requests.exceptions.RequestException as error:
-        print("No se pudo conectar con OpenWeatherMap:", error)
+        # Se muestra solo el tipo de error: el mensaje completo trae la URL, y la URL lleva la API key en appid
+        print("No se pudo conectar con OpenWeatherMap:", type(error).__name__)
         return None
 
     if respuesta.status_code != 200:
@@ -108,7 +109,8 @@ def consultar_clima_xml(ciudad, api_key):
     try:
         respuesta = requests.get(URL_CLIMA, params=parametros, timeout=TIMEOUT_SEGUNDOS)
     except requests.exceptions.RequestException as error:
-        print("No se pudo conectar con OpenWeatherMap:", error)
+        # Se muestra solo el tipo de error: el mensaje completo trae la URL, y la URL lleva la API key en appid
+        print("No se pudo conectar con OpenWeatherMap:", type(error).__name__)
         return None
 
     if respuesta.status_code != 200:
