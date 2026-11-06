@@ -4,6 +4,14 @@ try:
 except ImportError:
     API_KEY_CLIMA = ""
 
+# N17 y N24
+try:
+    from claves import EMAIL_USER, EMAIL_PASSWORD, DESTINATARIOS_REPORTE
+except ImportError:
+    EMAIL_USER = ""
+    EMAIL_PASSWORD = ""
+    DESTINATARIOS_REPORTE = []
+
 # N08
 URL_SITIO = "https://buenosaires.gob.ar"
 RUTA_NOTICIAS = "/gcaba_historico/infraestructura/noticias"
@@ -34,7 +42,7 @@ CARPETA_SALIDAS = "salidas"
 PREFIJO_REPORTE = "reporte_criticos_"
 ENCODING_CSV = "utf-8-sig"
 
-# N19, N20 y criterio de aceptación 1
+# N19, N20
 COLUMNAS_OBLIGATORIAS = ["id", "estado", "zona", "demora_horas", "cumplimiento"]
 COLUMNAS_NUMERICAS = ["distancia_km", "horas_estimadas", "horas_transcurridas", "demora_horas", "cumplimiento"]
 COLUMNAS_CLIMA = ["destino", "temperatura", "precipitacion_mm", "descripcion", "lluvia_fuerte"]
@@ -46,6 +54,18 @@ COLUMNAS_CALIDAD = ["id", "cliente", "destino", "zona", "fecha_despacho", "horas
 # N22
 DIAS_SEMANA = {"Monday": "Lunes", "Tuesday": "Martes", "Wednesday": "Miércoles", "Thursday": "Jueves",
                "Friday": "Viernes", "Saturday": "Sábado", "Sunday": "Domingo"}
+
+# N24 y N25
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+MODO_PRUEBA = True  # True: los avisos a clientes se mandan a DESTINATARIOS_REPORTE y no a los clientes
+PREFIJO_LOG = "log_correos_"
+ADJUNTOS_REPORTE = ["csv", "excel", "grafico"]  # claves del diccionario de rutas que devuelve el ETL
+TIPOS_ADJUNTO = {
+    "csv": ("text", "csv"),
+    "excel": ("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    "grafico": ("image", "png"),
+}
 
 # N05
 URLS_NOVEDADES_VIALES = [URL_TRAFICO]

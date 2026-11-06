@@ -7,6 +7,7 @@ from config import (RUTA_ENVIO_DATOS, URLS_NOVEDADES_VIALES, SITIOS_WEB, API_KEY
 from modulos.apis import consultar_clima_ciudad, obtener_clima_destinos, enviar_alerta_post
 from modulos.etl import ejecutar_etl
 from modulos.envios import cargar_envios, evaluar_riesgo_envio, generar_mensaje_cliente, armar_asunto_email, filtrar_por_estado
+from modulos.notificaciones import enviar_notificaciones
 from modulos.metricas import (inspeccionar_df, porcentaje_criticos_por_zona, demora_promedio_por_zona,
                               indicadores_generales, graficar_estados)
 from modulos.scraping import obtener_html, registrar_sitio, ejemplos_find_all, buscar_alertas_viales
@@ -93,7 +94,7 @@ def ejecutar_plataforma():
             enviadas += 1
     print(f"Alertas enviadas por POST: {enviadas} de {len(criticos)}")
 
-    # N19: va después de evaluar los riesgos para que estado, causa y acción ya existan
+    # N19
     df_envios, rutas_etl = ejecutar_etl(lista_envios, lista_clima, alertas_viales)
     print("\n=== Inspección del DataFrame ===")
     inspeccionar_df(df_envios)
@@ -108,6 +109,10 @@ def ejecutar_plataforma():
     print(porcentaje_criticos_por_zona(df_envios))
     print("\n=== Demora promedio por zona (horas) ===")
     print(demora_promedio_por_zona(df_envios))
+
+    # N24
+    print("\n=== Envío de emails ===")
+    enviar_notificaciones(lista_envios, rutas_etl)
 
     print("\nSe muestra el gráfico de estados. Al cerrar la ventana termina el programa")
     graficar_estados(df_envios)
