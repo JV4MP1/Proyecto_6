@@ -152,6 +152,10 @@ def resumir_zonas_con_join(df):
 def generar_reporte_criticos(df):
     criticos = df[df["estado"] == ESTADO_CRITICO]
     reporte = criticos[COLUMNAS_REPORTE].sort_values(by="demora_horas", ascending=False)
+    # En el archivo que lee una persona, un casillero vacío no explica nada. Las alertas viales solo cubren
+    # la Ciudad de Buenos Aires, así que fuera de AMBA se aclara que no hay cobertura (no es lo mismo que 0)
+    reporte["cantidad_alertas"] = reporte["cantidad_alertas"].astype(object).fillna("Sin cobertura")
+    reporte["descripcion_clima"] = reporte["descripcion_clima"].fillna("Sin dato")
     return reporte.reset_index(drop=True)
 
 # N20
@@ -245,13 +249,14 @@ def graficar_ranking_criticos(df, ruta):
     # Barras horizontales para comparar zonas. Ascendente porque barh dibuja de abajo hacia arriba:
     # así la zona con más críticos queda primera.
     ranking = porcentaje_criticos_por_zona(df).sort_values(by="porcentaje_criticos")
-    ax = ranking.plot(kind="barh", x="zona", y="porcentaje_criticos", legend=False,
-                      title="Porcentaje de envíos críticos por zona")
-    ax.set_xlabel("Envíos críticos (%)")
-    ax.set_ylabel("Zona")
+    # figsize y fontsize más grandes para que el gráfico se lea proyectado o adjunto al email
+    ax = ranking.plot(kind="barh", x="zona", y="porcentaje_criticos", legend=False, figsize=(10, 6), fontsize=14)
+    ax.set_title("Porcentaje de envíos críticos por zona", fontsize=18)
+    ax.set_xlabel("Envíos críticos (%)", fontsize=14)
+    ax.set_ylabel("Zona", fontsize=14)
     ax.set_xlim(0, 100)
     plt.tight_layout()
-    plt.savefig(ruta)
+    plt.savefig(ruta, dpi=150)
     plt.close()
 
 
